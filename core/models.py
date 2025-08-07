@@ -27,6 +27,12 @@ class CertificateRequestModel:
         return str(result.inserted_id)
 
     @classmethod
+    def update_report_path(cls, request_id, path):
+        cls.get_collection().update_one(
+            {"_id": ObjectId(request_id)}, {"$set": {"report_path": path}}
+        )
+
+    @classmethod
     def update_status(cls, request_id, status):
         cls.get_collection().update_one(
             {"_id": ObjectId(request_id)}, {"$set": {"status": status}}
@@ -36,7 +42,7 @@ class CertificateRequestModel:
     def add_certificate(cls, request_id, certificate_id):
         cls.get_collection().update_one(
             {"_id": ObjectId(request_id)},
-            {"$push": {"certificates": ObjectId(certificate_id)}}
+            {"$push": {"certificates": ObjectId(certificate_id)}},
         )
 
 
