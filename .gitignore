@@ -1,2 +1,6 @@
 .idea
 .vercel
+core/__pycache__
+core/routes/__pycache__
+.env
+uploads/*

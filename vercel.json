@@ -1,11 +1,15 @@
 {
   "version": 2,
-  "functions": {
-    "api/generate.py": {
-      "runtime": "python3.11"
+  "builds": [
+    {
+      "src": "main.py",
+      "use": "@vercel/python"
     }
-  },
-  "rewrites": [
-    { "source": "/", "destination": "/index.html" }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "main.py"
+    }
   ]
 }
