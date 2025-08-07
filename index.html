@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{{ url_for('static', filename='celec_logo.png') }}" type="image/png">
+    <title>Certificate Generator</title>
+</head>
+<body>
+    <h1>Upload Certificate Template and Name List</h1>
+    <form action="" id="cert-form">
+        <label for="">Certificate Template (Image): </label>
+        <input type="file" name="template" required /> <br><br>
+
+        <label for="">Name List (TXT or XLS):</label>
+        <input type="file" name="names" accept=".txt, .xls, .xlsx" required /> <br><br>
+
+        <button type="submit">Generate Certificates</button>
+    </form>
+    <div id="preview" style="margin-top: 20px;"></div>
+
+    <script>
+        document.getElementById("cert-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+            const form = e.target
+            const formData = new FormData(form)
+
+            const response = await fetch("api/generate", {
+                method: "POST",
+                body: formData
+            })
+
+            if (response.ok) {
+                const blob = await response.blob()
+                const url = URL.createObjectURL(blob)
+
+                const link = document.createElement("a")
+                link.href = url
+                link.download = "certificates.png"
+                link.innerText = "Download Certificates"
+                resultContainer.innerHTML = ""
+                resultContainer.appendChild(link)
+            } else {
+                const errorText = await response.text()
+                resultContainer.innerHTML = `<p style="color: red;">Error: ${errorText}</p>`
+            }
+        })
+    </script>
+</body>
+</html>
