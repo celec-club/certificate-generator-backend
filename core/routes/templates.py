@@ -1,39 +1,45 @@
-import os
 from flask import Blueprint, request, jsonify
 from core.models import TemplateModel
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import cloudinary
+import cloudinary.uploader
 
 templates_bp = Blueprint("templates", __name__, url_prefix="/api/templates")
-
-# Ensure the upload directory exists
-UPLOAD_DIR = "uploads/templates"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @templates_bp.route("/", methods=["POST"])
 def upload_template():
-    if "file" not in request.files:
-        return jsonify({"error": "No file part in request"}), 400
+    file = request.files.get("file")
+    name = request.form.get("name")
+    uploaded_by = request.form.get("uploaded_by")
 
-    file = request.files["file"]
+    if not file:
+        return jsonify({"error": "No file provided"}), 400
 
-    if file.filename == "":
-        return jsonify({"error": "No selected file"}), 400
+    # Upload to Cloudinary
+    try:
+        upload_result = cloudinary.uploader.upload(file=file)
+        image_url = upload_result.get("secure_url")
+        public_id = upload_result.get("public_id")
 
-    file_name = secure_filename(file.filename)
-    if not file_name:
-        return jsonify({"error": "Invalid filename"}), 400
+        # Save to DB
+        template_id = TemplateModel.create(
+            name=name, image_url=image_url, uploaded_by=uploaded_by
+        )
 
-    # Save file with timestamp prefix
-    timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
-    saved_name = f"{timestamp}_{file_name}"
-    file_path = os.path.join(UPLOAD_DIR, saved_name)
-    file.save(file_path)
-
-    # Save metadata in DB
-    template_id = TemplateModel.create(name=file_name, image_url=file_path)
-    return jsonify({"template_id": template_id}), 201
+        return (
+            jsonify(
+                {
+                    "template_id": template_id,
+                    "image_url": image_url,
+                    "public_id": public_id,
+                }
+            ),
+            201,
+        )
+    except cloudinary.exceptions.Error as e:
+        return jsonify({"error": str(e)}), 500
 
 
 @templates_bp.route("/", methods=["GET"])
@@ -42,11 +48,17 @@ def list_templates():
     result = []
 
     for template in templates:
-        result.append({
-            "_id": str(template["_id"]),
-            "name": template.get("name"),
-            "image_url": template.get("image_url"),
-            "created_at": template.get("created_at").isoformat() if template.get("created_at") else None
-        })
+        result.append(
+            {
+                "_id": str(template["_id"]),
+                "name": template.get("name"),
+                "image_url": template.get("image_url"),
+                "created_at": (
+                    template.get("created_at").isoformat()
+                    if template.get("created_at")
+                    else None
+                ),
+            }
+        )
 
     return jsonify(result), 200
