@@ -33,9 +33,7 @@ The **Certificate Generator Backend** is a Flask-based API system designed to au
 
 **Diagram:**
 
-```
-User → API (Flask) → Cloudinary (template) → PIL (text rendering) → ZIP Output
-```
+<img width="970" height="492" alt="Image" src="https://github.com/user-attachments/assets/8c814a22-fa1a-4256-9f83-a54562424140" />
 
 ---
 
