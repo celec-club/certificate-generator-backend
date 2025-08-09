@@ -108,7 +108,7 @@ Or edit `.env.example` file
 ```bash
 flask run
 # Or
-python app.py
+python main.py
 ```
 
 ---
