@@ -110,5 +110,5 @@ class TemplateModel:
     @classmethod
     def remove_templates(cls, template_ids):
         return cls.get_collection().delete_many(
-            {"_id": {"_in": [ObjectId(tid) for tid in template_ids]}}
+            {"_id": {"$in": [ObjectId(tid) for tid in template_ids]}}
         )
