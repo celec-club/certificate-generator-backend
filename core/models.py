@@ -45,6 +45,12 @@ class CertificateRequestModel:
             {"$push": {"certificates": ObjectId(certificate_id)}},
         )
 
+    @classmethod
+    def remove_requests(cls, request_ids):
+        cls.get_collection().delete_many(
+            {"_id": {"$in": [ObjectId(rid) for rid in request_ids]}}
+        )
+
 
 class CertificateModel:
     @classmethod
@@ -67,6 +73,12 @@ class CertificateModel:
     @classmethod
     def get(cls, certificate_id):
         return cls.get_collection().find_one({"_id": ObjectId(certificate_id)})
+
+    @classmethod
+    def remove_certificates(cls, cert_ids):
+        return cls.get_collection().delete_many(
+            {"_id": {"$in": [ObjectId(cid) for cid in cert_ids]}}
+        )
 
 
 class TemplateModel:
@@ -94,3 +106,9 @@ class TemplateModel:
     @classmethod
     def get_all(cls):
         return list(cls.get_collection().find().sort("created_at", -1))
+
+    @classmethod
+    def remove_templates(cls, template_ids):
+        return cls.get_collection().delete_many(
+            {"_id": {"$in": [ObjectId(tid) for tid in template_ids]}}
+        )

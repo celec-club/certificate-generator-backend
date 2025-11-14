@@ -11,9 +11,12 @@ import io
 certificates_bp = Blueprint("certificates", __name__, url_prefix="/api/certificates")
 FONT_PATH = "arial.ttf"
 
+
 @certificates_bp.route("/generate/<string:request_id>", methods=["POST"])
 def generate_certificate(request_id):
-    req = CertificateRequestModel.get_collection().find_one({"_id": ObjectId(request_id)})
+    req = CertificateRequestModel.get_collection().find_one(
+        {"_id": ObjectId(request_id)}
+    )
     if not req:
         return jsonify({"error": "Request not found"}), 404
 
@@ -59,9 +62,7 @@ def generate_certificate(request_id):
         img.save(output_path)
 
         cert_id = CertificateModel.create(
-            request_id=request_id,
-            name=name,
-            image_url=output_path
+            request_id=request_id, name=name, image_url=output_path
         )
         CertificateRequestModel.add_certificate(request_id, cert_id)
         cert_ids.append(cert_id)
@@ -81,7 +82,9 @@ def generate_certificate(request_id):
 
 @certificates_bp.route("/download/<string:request_id>", methods=["GET"])
 def download_certificates(request_id):
-    req = CertificateRequestModel.get_collection().find_one({"_id": ObjectId(request_id)})
+    req = CertificateRequestModel.get_collection().find_one(
+        {"_id": ObjectId(request_id)}
+    )
     if not req or not req.get("certificates"):
         return jsonify({"error": "No certificates found for this request"}), 404
 
@@ -89,7 +92,9 @@ def download_certificates(request_id):
     with zipfile.ZipFile(memory_file, "w") as zf:
         # Add certificate images
         for cert_id in req["certificates"]:
-            cert = CertificateModel.get_collection().find_one({"_id": ObjectId(cert_id)})
+            cert = CertificateModel.get_collection().find_one(
+                {"_id": ObjectId(cert_id)}
+            )
             if cert:
                 file_path = cert["image_url"]
                 file_name = f"{cert['name']}.png"
@@ -120,3 +125,29 @@ def list_certificates():
         result.append(cert)
 
     return jsonify(result), 200
+
+
+@certificates_bp.route("/<string:certificate_id>", methods=["DELETE"])
+def remove_certificates(certificate_id):
+    rv_certificate = CertificateModel.get_collection().find_one_and_delete(
+        {"_id": ObjectId(certificate_id)}
+    )
+
+    # Checking if the certificate exist or not
+    if not rv_certificate:
+        return jsonify({"error": f"No certificate found with id {certificate_id}"}), 404
+
+    # Convert ObjectIds to strings
+    rv_certificate["_id"] = str(rv_certificate["_id"])
+    rv_certificate["request_id"] = (
+        str(rv_certificate["request_id"]) if rv_certificate.get("request_id") else None
+    )
+
+    return (
+        jsonify(
+            {
+                "success": f"Deleted certificate with id {rv_certificate['_id']} successfully"
+            }
+        ),
+        200,
+    )
