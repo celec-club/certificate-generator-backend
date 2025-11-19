@@ -10,7 +10,7 @@ class TemplateModel:
         self.db = self.client[Config.DB_NAME]
         self.template_collection = self.db[Config.TEMPLATE_COLLECTION_NAME]
 
-    def get_collection(self):
+    def temp_col(self):
         return self.template_collection
 
     def create_template(self, name: str, image_url: str, uploaded_by=None):
@@ -18,22 +18,21 @@ class TemplateModel:
             "name": name,
             "image_url": image_url,
             "uploaded_by": ObjectId(uploaded_by) if uploaded_by else None,
-            "created_at": datetime.utcnow,
+            "created_at": datetime.utcnow(),
         }
 
         result = self.template_collection.insert_one(doc)
         return str(result.inserted_id)
 
     def get_template_by_id(self, template_id: str):
-        return self.get_collection().find_one({"_id": ObjectId(template_id)})
+        return self.temp_col().find_one({"_id": ObjectId(template_id)})
 
-    def get_certificates(self):
-        return list(self.get_collection().find().sort("created_at", -1))
+    def get_all_templates(self):
+        return list(self.temp_col().find().sort("created_at", -1))
 
-    def remove_certificates(self, template_id):
+    def remove_template(self, template_id):
         try:
-            res = self.get_collection().delete_one({"_id": ObjectId(template_id)})
+            res = self.temp_col().delete_one({"_id": ObjectId(template_id)})
             return res.deleted_count > 0
-        except Exception as e:
-            print(f"Error deleting template {template_id}: {e}")
+        except:
             return False
