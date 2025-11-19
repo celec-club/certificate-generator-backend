@@ -10,7 +10,7 @@ class CertificateModel:
         self.db = self.client[Config.DB_NAME]
         self.certificates_collection = self.db[Config.CERTIFICATES_COLLECTION_NAME]
 
-    def get_collection(self):
+    def cert_col(self):
         return self.certificates_collection
 
     def create_certificate(self, request_id: str, name: str, image_url: str):
@@ -21,19 +21,18 @@ class CertificateModel:
             "created_at": datetime.utcnow(),
         }
 
-        result = self.get_collection().insert_one(cert)
+        result = self.cert_col().insert_one(cert)
         return str(result.inserted_id)
 
     def get_certificate_by_id(self, certificate_id: str):
-        return self.get_collection().find_one({"_id": ObjectId(certificate_id)})
+        return self.cert_col().find_one({"_id": ObjectId(certificate_id)})
 
     def get_certificates(self):
-        return self.get_collection().find()
+        return list(self.cert_col().find())
 
     def remove_certificates(self, certificate_id: str):
         try:
-            res = self.get_collection().delete_one({"_id": ObjectId(certificate_id)})
+            res = self.cert_col().delete_one({"_id": ObjectId(certificate_id)})
             return res.deleted_count > 0
-        except Exception as e:
-            print(f"Error deleting certificate with id {certificate_id}: {e}")
+        except:
             return False
