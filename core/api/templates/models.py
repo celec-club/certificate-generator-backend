@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from datetime import datetime
 from bson import ObjectId
-from config import Config
+from core.config import Config
 
 
 class TemplateModel:
