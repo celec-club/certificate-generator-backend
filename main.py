@@ -1,20 +1,42 @@
-from flask import Flask, request, jsonify, render_template
+import os
+from flask import Flask, request, jsonify
 from flask_cors import CORS
-from core.routes.requests import requests_bp
-from core.routes.templates import templates_bp
-from core.routes.certificates import certificates_bp
+from core.api.certificates.routes import CertificateRoutes
+from core.api.requests.routes import CertificateRequestRoutes
+from core.api.templates.routes import TemplateRoutes
+from frontend.routes import frontend
 
 app = Flask(__name__)
-CORS(app)
+app.secret_key = os.urandom(24)
 
-app.register_blueprint(requests_bp)
-app.register_blueprint(certificates_bp)
-app.register_blueprint(templates_bp)
+if not app.secret_key:
+    raise ValueError("No SESSION_SECRET set for Flask application")
+
+# -------------------------------
+# Initialize CORS
+# -------------------------------
+CORS(app, origins=["*"])
+
+# -------------------------------
+# Register blueprints
+# -------------------------------
+certificates_routes = CertificateRoutes()
+certificate_requests_routes = CertificateRequestRoutes()
+template_routes = TemplateRoutes()
+
+app.register_blueprint(certificates_routes.bp)
+app.register_blueprint(certificate_requests_routes.bp)
+app.register_blueprint(template_routes.bp)
+app.register_blueprint(frontend)
 
 
-@app.route("/", methods=["GET"])
+# -------------------------------
+# Browser Routes
+# -------------------------------
+@app.route("/")
 def index():
-    return render_template("index.html")
+    return jsonify({"service": "Certificate Generator Backend", "status": "online"})
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)

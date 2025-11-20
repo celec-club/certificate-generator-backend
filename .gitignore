@@ -1,5 +1,8 @@
 .idea
 .vercel
 core/__pycache__
-core/routes/__pycache__
+core/api/certificates/__pycache__
+core/api/templates/__pycache__
+core/api/requests/__pycache__
 .env
+frontend
