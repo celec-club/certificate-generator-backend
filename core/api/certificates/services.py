@@ -1,7 +1,6 @@
 import os, tempfile, requests, io, zipfile
 from PIL import Image, ImageDraw, ImageFont
 from flask import jsonify, send_file
-from bson import ObjectId
 
 from core.api.certificates.models import CertificateModel
 from core.api.requests.models import CertificateRequestModel
@@ -135,6 +134,6 @@ class CertificateServices:
         deleted = self.certificate_model.remove_certificates(certificate_id)
 
         if not deleted:
-            return jsonify({"error": f"Certificate {certificate_id} not found"}), 404
+            return jsonify({"error": f"Certificate with id '{certificate_id}' not found"}), 404
 
-        return jsonify({"success": f"Certificate {certificate_id} deleted"}), 200
+        return jsonify({"success": f"Certificate with id '{certificate_id}' deleted successfully"}), 200
