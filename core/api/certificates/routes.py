@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify
 from core.api.certificates.services import CertificateServices
 
 
-class CertificatesRoutes:
+class CertificateRoutes:
     def __init__(self):
         self.certificate_services = CertificateServices()
         self.bp = Blueprint("certificates", __name__, url_prefix="/api/v2/certificates")
