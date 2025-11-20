@@ -45,20 +45,19 @@ class TemplateServices:
     def list_templates(self):
         templates = self.temp.get_all_templates()
 
-        result = []
-        for t in templates:
-            result.append(
-                {
-                    "_id": str(t["_id"]),
-                    "name": t.get("name"),
-                    "image_url": t.get("image_url"),
-                    "uploaded_by": (
-                        str(t.get("uploaded_by")) if t.get("uploaded_by") else None
-                    ),
-                    "created_at": (
-                        t.get("created_at").isoformat() if t.get("created_at") else None
-                    ),
-                }
-            )
+        result = [
+            {
+                "_id": str(t["_id"]),
+                "name": t.get("name"),
+                "image_url": t.get("image_url"),
+                "uploaded_by": (
+                    str(t.get("uploaded_by")) if t.get("uploaded_by") else None
+                ),
+                "created_at": (
+                    t.get("created_at").isoformat() if t.get("created_at") else None
+                ),
+            }
+            for t in templates
+        ]
 
         return jsonify(result), 200
