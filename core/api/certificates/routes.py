@@ -9,14 +9,8 @@ class CertificateRoutes:
         self.register_routes()
 
     def register_routes(self):
-        @self.bp.route("/", methods=["POST"])
-        def generate_certificate():
-            data = request.json or {}
-            request_id = data.get("request_id")
-
-            if not request_id:
-                return jsonify({"error": "request_id is required"}), 400
-
+        @self.bp.route("/generate/<string:request_id>", methods=["POST"])
+        def generate_certificate(request_id):
             return self.certificate_services.generate_certificate(request_id)
 
         @self.bp.route("/download/<string:request_id>", methods=["GET"])
