@@ -17,7 +17,7 @@ class TemplateModel:
         doc = {
             "name": name,
             "image_url": image_url,
-            "uploaded_by": ObjectId(uploaded_by) if uploaded_by else None,
+            "uploaded_by": uploaded_by if uploaded_by else None,
             "created_at": datetime.utcnow(),
         }
 
