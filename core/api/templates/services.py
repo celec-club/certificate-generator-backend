@@ -61,3 +61,19 @@ class TemplateServices:
         ]
 
         return jsonify(result), 200
+
+    def remove_template(self, template_id):
+        deleted = self.temp.remove_template(template_id)
+
+        if not deleted:
+            return (
+                jsonify({"error": f"Template with id: '{template_id}' not found"}),
+                404,
+            )
+
+        return (
+            jsonify(
+                {"success": f"Template with id '{template_id}' deleted successfully"}
+            ),
+            200,
+        )
