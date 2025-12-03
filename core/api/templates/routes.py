@@ -16,3 +16,7 @@ class TemplateRoutes:
         @self.bp.route("/", methods=["GET"])
         def list_templates():
             return self.template_services.list_templates()
+
+        @self.bp.route("/<string:template_id>", methods=["DELETE"])
+        def remove_template(template_id):
+            return self.template_services.remove_template(template_id)
