@@ -12,7 +12,7 @@ app = Flask(__name__)
 # -------------------------------
 CORS(
     app,
-    origins=["http://localhost:5173"],
+    origins=["http://localhost:5173", "https://backend-certificate-gen.celec.codes/"],
     supports_credentials=True,
 )
 
