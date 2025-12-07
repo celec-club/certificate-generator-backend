@@ -2,11 +2,13 @@ import os, tempfile, requests, io, zipfile
 from PIL import Image, ImageDraw, ImageFont
 from flask import jsonify, send_file
 
+
 from core.api.certificates.models import CertificateModel
 from core.api.requests.models import CertificateRequestModel
 from core.api.templates.models import TemplateModel
 
-
+import cv2
+import numpy as np
 FONT_PATH = "arial.ttf"
 
 
@@ -38,35 +40,35 @@ class CertificateServices:
         try:
             response = requests.get(image_url)
             response.raise_for_status()
-            base_img = Image.open(io.BytesIO(response.content)).convert("RGBA")
+            pil_img = Image.open(io.BytesIO(response.content)).convert("RGBA")
         except Exception as e:
             return jsonify({"error": f"Failed to fetch template image: {e}"}), 500
 
-        image_width, image_height = base_img.size
-
-        # Font
-        font_size = max(20, min(int(image_width * 0.05), 120))
-        try:
-            font = ImageFont.truetype(FONT_PATH, font_size)
-        except:
-            font = ImageFont.load_default()
+        img_width, img_height = pil_img.size
 
         for name in names:
-            image = base_img.copy()
-            draw = ImageDraw.Draw(image)
-
-            text_bbox = draw.textbbox((0, 0), name, font=font)
-            text_w = text_bbox[2] - text_bbox[0]
-            text_h = text_bbox[3] - text_bbox[1]
-
-            x = (image_width - text_w) // 2
-            y = (image_height - text_h) // 2
-
-            draw.text((x, y), name, fill="black", font=font)
-
+########################################################################################################################################################""            
+                        #pil to cv2
+            cv_img = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGBA2BGR)
+            line_y = 300  
+            color = (29, 36, 68) 
+            max_font_scale = 0.8  
+            thickness = 1
+            font = cv2.FONT_HERSHEY_SIMPLEX
+            font_scale = 1.0
+            (text_w, text_h), baseline = cv2.getTextSize(name, font, font_scale, thickness)
+            #limit
+            if text_w > 0 and text_h > 0:
+                font_scale = min(font_scale * (img_width * 0.5 / text_w), max_font_scale)
+            (text_w, text_h), baseline = cv2.getTextSize(name, font, font_scale, thickness)
+            #center H V
+            x = (img_width - text_w) // 2
+            y = line_y
+            #name
+            cv2.putText(cv_img, name, (x, y), font, font_scale, color, thickness, lineType=cv2.LINE_AA)
             output_path = os.path.join(template_dir, f"{name}.png")
-            image.save(output_path)
-
+            cv2.imwrite(output_path, cv_img)
+#########################################################################################################################################################################
             cert_id = self.certificate_model.create_certificate(
                 request_id=request_id, name=name, image_url=output_path
             )
